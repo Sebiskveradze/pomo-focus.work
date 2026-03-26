@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ================= SEO META TAGS ================= -->
+    <title>Pomodoro Timer Online | Kostenlos | pomo-focus.work</title>
+    <meta name="description" content="Kostenloser, minimalistischer Pomodoro Timer online. Steigere deine Produktivität mit der 25-Minuten-Methode. Ohne Anmeldung, direkt im Browser.">
+    <meta name="keywords" content="Pomodoro Timer, online, kostenlos, Zeitmanagement, lernen, arbeiten, Fokus, Produktivität, 25 Minuten">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Dein Name oder Markenname">
+    
+    <!-- Open Graph (Fürs Teilen auf Social Media) -->
+    <meta property="og:title" content="pomo-focus.work - Der ablenkungsfreie Pomodoro Timer">
+    <meta property="og:description" content="Steigere deine Produktivität mit diesem kostenlosen, minimalistischen Pomodoro Timer.">
+    <meta property="og:type" content="website">
+
+    <!-- JSON-LD Schema (Hilft Google zu verstehen, was die Seite ist) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "pomo-focus.work Pomodoro Timer",
+      "applicationCategory": "Productivity",
+      "operatingSystem": "All",
+      "description": "Ein minimalistischer, webbasierter Pomodoro Timer zur Steigerung der Produktivität ohne Ablenkungen.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      }
+    }
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #ffffff;
+            --primary-color: #ff5252;
+            --secondary-color: #333333;
+            --ring-bg: #2a2a2a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        /* --- TIMER APP BEREICH --- */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+            margin-top: 5px;
+        }
+
+        /* Fortschritts-Ring */
+        .timer-wrapper {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .progress-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: rotate(-90deg); /* Startet oben */
+        }
+
+        .progress-ring__circle-bg {
+            fill: transparent;
+            stroke: var(--ring-bg);
+            stroke-width: 12;
+        }
+
+        .progress-ring__circle {
+            fill: transparent;
+            stroke: var(--primary-color);
+            stroke-width: 12;
+            stroke-linecap: round;
+            /* Umfang = 2 * pi * r (r=140) = 879.64 */
+            stroke-dasharray: 879.64;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+        }
+
+        #time-display {
+            font-size: 4rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Steuerelemente */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #444;
+            transform: translateY(-2px);
+        }
+
+        button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .main-action {
+            display: flex;
+            gap: 15px;
+        }
+
+        #start-btn {
+            background-color: var(--primary-color);
+            padding: 15px 40px;
+            font-size: 1.2rem;
+        }
+
+        #start-btn:hover {
+            background-color: #ff3333;
+        }
+
+        /* --- SEO CONTENT BEREICH --- */
+        .seo-content {
+            background-color: #1a1a1a;
+            padding: 60px 20px;
+            border-top: 1px solid #333;
+        }
+
+        .content-inner {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .content-inner h2 {
+            color: var(--primary-color);
+            margin-top: 40px;
+        }
+
+        .content-inner p, .content-inner li {
+            color: #ccc;
+            font-size: 1.1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .timer-wrapper { width: 250px; height: 250px; }
+            #time-display { font-size: 3rem; }
+            .progress-ring svg { width: 250px; height: 250px; }
+            .progress-ring__circle, .progress-ring__circle-bg { r: 115; cx: 125; cy: 125; }
+            /* Umfang für mobiles r=115: 722.56 */
+        }
+
+        /* --- ADSENSE PLATZHALTER STYLING --- */
+        .ad-container {
+            width: 100%;
+            max-width: 728px;
+            margin: 40px auto 20px auto;
+            text-align: center;
+            min-height: 90px; /* Standard Banner Höhe, verhindert Layout-Sprünge */
+            background-color: #1e1e1e;
+            border: 1px dashed #444;
+            display: block; /* flex entfernt, um Layout-Probleme bei AdSense zu vermeiden */
+            padding-top: 10px;
+            color: #666;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* --- SPRACHAUSWAHL --- */
+        .lang-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .lang-switcher select {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: 1px solid #444;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            outline: none;
+        }
+    </style>
+
+    <!-- Google AdSense Basis-Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9810357875384225" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <!-- SPRACHAUSWAHL -->
+    <div class="lang-switcher">
+        <select id="lang-select" onchange="changeLanguage(this.value)">
+            <option value="de">🇩🇪 DE</option>
+            <option value="en">🇬🇧 EN</option>
+            <option value="es">🇪🇸 ES</option>
+        </select>
+    </div>
+
+    <!-- HAUPTANWENDUNG -->
+    <main class="app-container">
+        <header>
+            <h1>pomo-focus.work</h1>
+            <div class="subtitle" data-i18n="subtitle">Der ablenkungsfreie Pomodoro Timer</div>
+        </header>
+
+        <div class="controls">
+            <button id="mode-pomodoro" class="active" onclick="setMode('pomodoro')" data-i18n="btnPomo">Pomodoro (25m)</button>
+            <button id="mode-short" onclick="setMode('shortBreak')" data-i18n="btnShort">Kurze Pause (5m)</button>
+            <button id="mode-long" onclick="setMode('longBreak')" data-i18n="btnLong">Lange Pause (15m)</button>
+        </div>
+
+        <div class="timer-wrapper">
+            <div class="progress-ring">
+                <!-- SVG für den Ring. Werte werden im JS ggf. für Mobile angepasst -->
+                <svg width="300" height="300" id="ring-svg">
+                    <circle class="progress-ring__circle-bg" cx="150" cy="150" r="140"></circle>
+                    <circle class="progress-ring__circle" id="progress-circle" cx="150" cy="150" r="140"></circle>
+                </svg>
+            </div>
+            <div id="time-display">25:00</div>
+        </div>
+
+        <div class="main-action">
+            <button id="start-btn" onclick="toggleTimer()" data-i18n="btnStart">Start</button>
+            <button onclick="resetTimer()" data-i18n="btnReset">Reset</button>
+        </div>
+    </main>
+
+    <!-- Beispiel-Anzeigenblock (Google AdSense) nach unten verschoben -->
+    <div class="ad-container">
+        <!-- Platzhalter-Text, falls der Adblocker an ist oder die Anzeige noch lädt -->
+        <ins class="adsbygoogle"
+             style="display:block; min-width: 250px; width: 100%;"
+             data-ad-client="ca-pub-9810357875384225"
+             data-ad-slot="1234567890"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             // Warten, bis das Layout gerendert ist, bevor die Anzeige geladen wird
+             window.addEventListener('load', function() {
+                 try {
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                 } catch (e) {
+                     console.warn("AdSense Fehler abgefangen (häufig in Vorschau-Umgebungen): ", e);
+                 }
+             });
+        </script>
+    </div>
+
+    <!-- SEO TEXTBEREICH (WICHTIG FÜR GOOGLE) -->
+    <article class="seo-content">
+        <div class="content-inner">
+            <h2 data-i18n="seoH1">Was ist ein Pomodoro Timer?</h2>
+            <p data-i18n="seoP1">Ein Pomodoro Timer ist ein einfaches, aber extrem effektives Werkzeug für das Zeitmanagement. Es basiert auf der Pomodoro-Technik, die in den 1980er Jahren von Francesco Cirillo entwickelt wurde. Die Kernidee ist es, Arbeit in hochkonzentrierte Intervalle (traditionell 25 Minuten) zu unterteilen, die durch kurze Pausen (5 Minuten) getrennt sind.</p>
+            
+            <h2 data-i18n="seoH2">Wie funktioniert dieser Online Timer?</h2>
+            <p data-i18n="seoP2">Unser kostenloser FocusFlow Timer benötigt keine Installation und keine Anmeldung. Folge einfach diesen Schritten:</p>
+            <ol>
+                <li data-i18n="li1"><strong>Aufgabe wählen:</strong> Entscheide dich für eine einzige Aufgabe, an der du arbeiten möchtest.</li>
+                <li data-i18n="li2"><strong>Timer starten:</strong> Klicke auf "Start" und arbeite fokussiert, bis der sanfte Alarm ertönt (25 Minuten).</li>
+                <li data-i18n="li3"><strong>Kurze Pause:</strong> Mache 5 Minuten Pause. Steh auf, trinke etwas Wasser und entspanne deine Augen.</li>
+                <li data-i18n="li4"><strong>Wiederholen:</strong> Nach vier Pomodoro-Intervallen machst du eine längere Pause von 15-30 Minuten.</li>
+            </ol>
+
+            <h2 data-i18n="seoH3">Warum FocusFlow nutzen?</h2>
+            <p data-i18n="seoP3">FocusFlow läuft lokal in deinem Browser. Es werden keine Nutzerdaten gespeichert. Das minimalistische Design (Dark Mode) schont die Augen und verhindert unnötige Ablenkungen beim Lernen, Programmieren oder Schreiben.</p>
+        </div>
+    </article>
+
+    <footer data-i18n="footer">
+        &copy; 2026 FocusFlow Pomodoro Timer. Ein kostenloses Tool für bessere Produktivität.
+    </footer>
+
+    <!-- JAVASCRIPT LOGIK -->
+    <script>
+        // --- ÜBERSETZUNGEN (i18n) ---
+        const translations = {
+            de: {
+                title: "Pomodoro Timer Online | Kostenlos | pomo-focus.work",
+                subtitle: "Der ablenkungsfreie Pomodoro Timer",
+                btnPomo: "Pomodoro (25m)",
+                btnShort: "Kurze Pause (5m)",
+                btnLong: "Lange Pause (15m)",
+                btnStart: "Start",
+                btnPause: "Pause",
+                btnResume: "Weiter",
+                btnReset: "Reset",
+                seoH1: "Was ist ein Pomodoro Timer?",
+                seoP1: "Ein Pomodoro Timer ist ein einfaches, aber extrem effektives Werkzeug für das Zeitmanagement. Es basiert auf der Pomodoro-Technik, die in den 1980er Jahren von Francesco Cirillo entwickelt wurde. Die Kernidee ist es, Arbeit in hochkonzentrierte Intervalle (traditionell 25 Minuten) zu unterteilen, die durch kurze Pausen (5 Minuten) getrennt sind.",
+                seoH2: "Wie funktioniert dieser Online Timer?",
+                seoP2: "Unser kostenloser pomo-focus.work Timer benötigt keine Installation und keine Anmeldung. Folge einfach diesen Schritten:",
+                li1: "<strong>Aufgabe wählen:</strong> Entscheide dich für eine einzige Aufgabe, an der du arbeiten möchtest.",
+                li2: "<strong>Timer starten:</strong> Klicke auf 'Start' und arbeite fokussiert, bis der sanfte Alarm ertönt (25 Minuten).",
+                li3: "<strong>Kurze Pause:</strong> Mache 5 Minuten Pause. Steh auf, trinke etwas Wasser und entspanne deine Augen.",
+                li4: "<strong>Wiederholen:</strong> Nach vier Pomodoro-Intervallen machst du eine längere Pause von 15-30 Minuten.",
+                seoH3: "Warum pomo-focus.work nutzen?",
+                seoP3: "pomo-focus.work läuft lokal in deinem Browser. Es werden keine Nutzerdaten gespeichert. Das minimalistische Design (Dark Mode) schont die Augen und verhindert unnötige Ablenkungen beim Lernen, Programmieren oder Schreiben.",
+                footer: "&copy; 2026 pomo-focus.work Pomodoro Timer. Ein kostenloses Tool für bessere Produktivität.",
+                tabWork: "Arbeit",
+                tabBreak: "Pause"
+            },
+            en: {
+                title: "Pomodoro Timer Online | Free | pomo-focus.work",
+                subtitle: "The distraction-free Pomodoro Timer",
+                btnPomo: "Pomodoro (25m)",
+                btnShort: "Short Break (5m)",
+                btnLong: "Long Break (15m)",
+                btnStart: "Start",
+                btnPause: "Pause",
+                btnResume: "Resume",
+                btnReset: "Reset",
+                seoH1: "What is a Pomodoro Timer?",
+                seoP1: "A Pomodoro Timer is a simple but extremely effective tool for time management. It is based on the Pomodoro Technique, developed by Francesco Cirillo in the 1980s. The core idea is to break down work into highly focused intervals (traditionally 25 minutes), separated by short breaks (5 minutes).",
+                seoH2: "How does this online timer work?",
+                seoP2: "Our free pomo-focus.work Timer requires no installation and no registration. Just follow these steps:",
+                li1: "<strong>Choose a task:</strong> Decide on a single task you want to work on.",
+                li2: "<strong>Start timer:</strong> Click 'Start' and work with focus until the gentle alarm sounds (25 minutes).",
+                li3: "<strong>Short break:</strong> Take a 5-minute break. Stand up, drink some water, and relax your eyes.",
+                li4: "<strong>Repeat:</strong> After four Pomodoro intervals, take a longer break of 15-30 minutes.",
+                seoH3: "Why use pomo-focus.work?",
+                seoP3: "pomo-focus.work runs locally in your browser. No user data is saved. The minimalist design (Dark Mode) is easy on the eyes and prevents unnecessary distractions while studying, coding, or writing.",
+                footer: "&copy; 2026 pomo-focus.work Pomodoro Timer. A free tool for better productivity.",
+                tabWork: "Work",
+                tabBreak: "Break"
+            },
+            es: {
+                title: "Temporizador Pomodoro Online | Gratis | pomo-focus.work",
+                subtitle: "El temporizador Pomodoro sin distracciones",
+                btnPomo: "Pomodoro (25m)",
+                btnShort: "Pausa Corta (5m)",
+                btnLong: "Pausa Larga (15m)",
+                btnStart: "Iniciar",
+                btnPause: "Pausar",
+                btnResume: "Continuar",
+                btnReset: "Reiniciar",
+                seoH1: "¿Qué es un Temporizador Pomodoro?",
+                seoP1: "Un Temporizador Pomodoro es una herramienta simple pero extremadamente efectiva para la gestión del tiempo. Se basa en la Técnica Pomodoro, desarrollada por Francesco Cirillo en la década de 1980. La idea central es dividir el trabajo en intervalos altamente enfocados (tradicionalmente 25 minutos), separados por breves descansos (5 minutos).",
+                seoH2: "¿Cómo funciona este temporizador online?",
+                seoP2: "Nuestro Temporizador pomo-focus.work gratuito no requiere instalación ni registro. Simplemente sigue estos pasos:",
+                li1: "<strong>Elige una tarea:</strong> Decide en qué única tarea quieres trabajar.",
+                li2: "<strong>Inicia el temporizador:</strong> Haz clic en 'Iniciar' y trabaja concentrado hasta que suene la suave alarma (25 minutos).",
+                li3: "<strong>Pausa corta:</strong> Tómate un descanso de 5 minutos. Levántate, bebe agua y relaja la vista.",
+                li4: "<strong>Repetir:</strong> Después de cuatro intervalos Pomodoro, toma un descanso más largo de 15-30 minutos.",
+                seoH3: "¿Por qué usar pomo-focus.work?",
+                seoP3: "pomo-focus.work se ejecuta localmente en tu navegador. No se guardan datos del usuario. El diseño minimalista (Modo Oscuro) protege la vista y evita distracciones innecesarias al estudiar, programar o escribir.",
+                footer: "&copy; 2026 pomo-focus.work Temporizador Pomodoro. Una herramienta gratuita para una mejor productividad.",
+                tabWork: "Trabajo",
+                tabBreak: "Descanso"
+            }
+        };
+
+        let currentLang = 'de';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.title = translations[lang].title;
+            
+            // Alle statischen Texte mit data-i18n Attribut aktualisieren
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+
+            // Dynamischen Start-Button Text anpassen, falls gerade pausiert
+            if (!isRunning && timeLeft < MODES[currentMode].time) {
+                startBtn.textContent = translations[currentLang].btnResume;
+            } else if (isRunning) {
+                startBtn.textContent = translations[currentLang].btnPause;
+            } else {
+                startBtn.textContent = translations[currentLang].btnStart;
+            }
+
+            updateDisplay(); // Aktualisiert den Tab-Titel
+        }
+
+        // --- KONFIGURATION ---
+        const MODES = {
+            pomodoro: { time: 25 * 60, color: '#ff5252' },
+            shortBreak: { time: 5 * 60, color: '#00e676' },
+            longBreak: { time: 15 * 60, color: '#29b6f6' }
+        };
+
+        let currentMode = 'pomodoro';
+        let timeLeft = MODES[currentMode].time;
+        let timerId = null;
+        let isRunning = false;
+
+        // --- DOM ELEMENTE ---
+        const timeDisplay = document.getElementById('time-display');
+        const startBtn = document.getElementById('start-btn');
+        const circle = document.getElementById('progress-circle');
+        const ringSvg = document.getElementById('ring-svg');
+
+        // Berechne den Umfang dynamisch basierend auf dem Radius
+        let radius = circle.r.baseVal.value;
+        let circumference = radius * 2 * Math.PI;
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        circle.style.strokeDashoffset = 0;
+
+        // Passt den Kreis an, wenn das Fenster skaliert wird (Mobile Responsive)
+        window.addEventListener('resize', () => {
+            if(window.innerWidth <= 600) {
+                circle.setAttribute('r', '115');
+                circle.setAttribute('cx', '125');
+                circle.setAttribute('cy', '125');
+                circle.previousElementSibling.setAttribute('r', '115');
+                circle.previousElementSibling.setAttribute('cx', '125');
+                circle.previousElementSibling.setAttribute('cy', '125');
+            } else {
+                circle.setAttribute('r', '140');
+                circle.setAttribute('cx', '150');
+                circle.setAttribute('cy', '150');
+                circle.previousElementSibling.setAttribute('r', '140');
+                circle.previousElementSibling.setAttribute('cx', '150');
+                circle.previousElementSibling.setAttribute('cy', '150');
+            }
+            radius = circle.r.baseVal.value;
+            circumference = radius * 2 * Math.PI;
+            circle.style.strokeDasharray = `${circumference} ${circumference}`;
+            updateDisplay(); // Aktualisiert den Fortschritt
+        });
+
+        // --- AUDIO GENERATOR (Keine externen MP3s nötig!) ---
+        function playAlarmSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+                
+                // Erstelle zwei Oszillatoren für einen angenehmen, glockenartigen Ton
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+
+                osc1.type = 'sine';
+                osc2.type = 'triangle';
+                
+                // Frequenzen (A5 und E6 für Harmonie)
+                osc1.frequency.setValueAtTime(880, ctx.currentTime);
+                osc2.frequency.setValueAtTime(1318.51, ctx.currentTime);
+
+                // Lautstärke-Verlauf (Fade out)
+                gainNode.gain.setValueAtTime(0, ctx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
+
+                osc1.connect(gainNode);
+                osc2.connect(gainNode);
+                gainNode.connect(ctx.destination);
+
+                osc1.start();
+                osc2.start();
+                osc1.stop(ctx.currentTime + 3);
+                osc2.stop(ctx.currentTime + 3);
+            } catch (e) {
+                console.log("Audio nicht unterstützt");
+            }
+        }
+
+        // --- TIMER LOGIK ---
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            timeDisplay.textContent = formattedTime;
+            
+            // SEO/UX: Tab-Titel aktualisieren (mit Übersetzungen)
+            const modeText = currentMode === 'pomodoro' ? translations[currentLang].tabWork : translations[currentLang].tabBreak;
+            document.title = isRunning ? `(${formattedTime}) ${modeText} - pomo-focus.work` : translations[currentLang].title;
+
+            // SVG Ring aktualisieren
+            const totalTime = MODES[currentMode].time;
+            const progress = timeLeft / totalTime;
+            const offset = circumference - (progress * circumference);
+            circle.style.strokeDashoffset = offset;
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                clearInterval(timerId);
+                isRunning = false;
+                startBtn.textContent = translations[currentLang].btnResume;
+                startBtn.style.backgroundColor = 'var(--secondary-color)';
+            } else {
+                isRunning = true;
+                startBtn.textContent = translations[currentLang].btnPause;
+                startBtn.style.backgroundColor = '#ff9800'; // Orange für Pause
+                
+                timerId = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateDisplay();
+                    } else {
+                        clearInterval(timerId);
+                        isRunning = false;
+                        startBtn.textContent = translations[currentLang].btnStart;
+                        startBtn.style.backgroundColor = MODES[currentMode].color;
+                        playAlarmSound();
+                        
+                        // Wechsle automatisch den Modus (simpel)
+                        if(currentMode === 'pomodoro') setMode('shortBreak');
+                        else setMode('pomodoro');
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerId);
+            isRunning = false;
+            timeLeft = MODES[currentMode].time;
+            startBtn.textContent = translations[currentLang].btnStart;
+            startBtn.style.backgroundColor = MODES[currentMode].color;
+            updateDisplay();
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            timeLeft = MODES[mode].time;
+            
+            // Buttons stylen
+            document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`mode-${mode === 'shortBreak' ? 'short' : mode === 'longBreak' ? 'long' : 'pomodoro'}`).classList.add('active');
+            
+            // Farbe des Rings anpassen
+            circle.style.stroke = MODES[mode].color;
+            
+            resetTimer();
+        }
+
+        // Initiale Anzeige
+        window.dispatchEvent(new Event('resize')); // Berechnet den Ring einmal korrekt
+    </script>
+</body>
+</html>
